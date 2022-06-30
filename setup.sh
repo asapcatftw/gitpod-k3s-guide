@@ -49,7 +49,6 @@ function setup_metalLB() {
   kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
   envsubst < "${DIR}/assets/metallb.yaml" | kubectl apply -f -
   kubectl get ds -n metallb-system
-  esac
 }
 
 function install() {
