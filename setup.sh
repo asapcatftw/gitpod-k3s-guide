@@ -78,7 +78,7 @@ function install() {
       ssh "${USER}@${IP}" "sudo chmod 644 /etc/rancher/k3s/k3s.yaml"
       
       # Apply RBAC
-      ssh "${USER}@${IP}" "kubectl apply -f https://kube-vip.io/manifests/rbac.yaml"
+      kubectl apply -f https://kube-vip.io/manifests/rbac.yaml
       
       # Image && alias
       ssh "${USER}@${IP}" "sudo ctr image pull ghcr.io/kube-vip/kube-vip:v0.4.4"
