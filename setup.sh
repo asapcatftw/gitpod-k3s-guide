@@ -75,12 +75,13 @@ function install() {
       echo "Install kube-vip"
       ssh-keyscan "${IP}" >> ~/.ssh/known_hosts
       ssh "${USER}@${IP}" "sudo apt-get update"
+      ssh "${USER}@${IP}" "sudo chmod 644 /etc/rancher/k3s/k3s.yaml"
       
       # Apply RBAC
       ssh "${USER}@${IP}" "kubectl apply -f https://kube-vip.io/manifests/rbac.yaml"
       
       # Image && alias
-      ssh "${USER}@${IP}" "ctr image pull ghcr.io/kube-vip/kube-vip:v0.4.4"
+      ssh "${USER}@${IP}" "sudo ctr image pull ghcr.io/kube-vip/kube-vip:v0.4.4"
       ssh "${USER}@${IP}" "alias kube-vip="ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip""
       
       # manifest
