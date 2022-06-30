@@ -85,7 +85,7 @@ function install() {
       ssh "${USER}@${IP}" 'alias kube-vip="ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip"'
       
       # manifest
-      ssh "${USER}@${IP}" 'alias kube-vip="kube-vip manifest daemonset--interface eth0 --address ${IP} --inCluster --taint --controlplane --arp --leaderElection | tee /var/lib/rancher/k3s/server/manifests/kube-vip.yaml"'
+      ssh "${USER}@${IP}" 'kube-vip manifest daemonset--interface eth0 --address ${IP} --inCluster --taint --controlplane --arp --leaderElection | tee /var/lib/rancher/k3s/server/manifests/kube-vip.yaml'
       
       # Set any future nodes to join this node
       JOIN_NODE=1
@@ -94,10 +94,9 @@ function install() {
 
       k3sup join \
         --ip "${IP}" \
+        --server-ip "${SERVER_IP}" \
         --k3s-extra-args="--disable traefik --disable servicelb --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true" \
         --server \
-        --server-ip "${SERVER_IP}" \
-        --server-user "${USER}" \
         --user "${USER}"
     fi
 
