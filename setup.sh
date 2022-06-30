@@ -43,13 +43,22 @@ function setup_managed_dns() {
   esac
 }
 
+function setup_metalLB() {
+  echo "Installing MetalLB"
+  kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/namespace.yaml
+  kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
+  envsubst < "${DIR}/assets/metallb.yaml" | kubectl apply -f -
+  kubectl get ds -n metallb-system
+  esac
+}
+
 function install() {
   echo "Installing Gitpod to k3s cluster"
 
   mkdir -p "${HOME}/.kube"
 
   echo "Install k3s with k3sup"
-  SERVER_IP=
+  SERVER_IP="${KUBE_VIP}"
   JOIN_NODE=0
   for IP in ${IP_LIST//,/ }; do
     if [ "${JOIN_NODE}" -eq 0 ]; then
@@ -58,19 +67,34 @@ function install() {
       k3sup install \
         --cluster \
         --ip "${IP}" \
+        --tls-san "${SERVER_IP}" \
         --local-path "${HOME}/.kube/config" \
-        --k3s-extra-args="--disable traefik --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true" \
+        --k3s-extra-args="--disable traefik --disable servicelb --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true" \
         --user "${USER}"
-
+      
+      # Setup kube-vip
+      echo "Install kube-vip"
+      ssh-keyscan "${IP}" >> ~/.ssh/known_hosts
+      ssh "${USER}@${IP}" "sudo apt-get update"
+      
+      # Apply RBAC
+      ssh "${USER}@${IP}" "kubectl apply -f https://kube-vip.io/manifests/rbac.yaml"
+      
+      # Image && alias
+      ssh "${USER}@${IP}" "ctr image pull ghcr.io/kube-vip/kube-vip:v0.4.4"
+      ssh "${USER}@${IP}" "alias kube-vip="ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip""
+      
+      # manifest
+      ssh "${USER}@${IP}" "alias kube-vip="kube-vip manifest daemonset--interface eth0 --address ${IP} --inCluster --taint --controlplane --arp --leaderElection | tee /var/lib/rancher/k3s/server/manifests/kube-vip.yaml""
+      
       # Set any future nodes to join this node
       JOIN_NODE=1
-      SERVER_IP="${IP}"
     else
       echo "Joining node ${IP} to ${SERVER_IP}"
 
       k3sup join \
         --ip "${IP}" \
-        --k3s-extra-args="--disable traefik --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true" \
+        --k3s-extra-args="--disable traefik --disable servicelb --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true" \
         --server \
         --server-ip "${SERVER_IP}" \
         --server-user "${USER}" \
@@ -101,6 +125,7 @@ function install() {
     cert-manager
 
   setup_managed_dns
+  setup_metalLB
 
   cat << EOF
 
