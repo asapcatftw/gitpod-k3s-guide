@@ -82,10 +82,10 @@ function install() {
       
       # Image && alias
       ssh "${USER}@${IP}" "sudo ctr image pull ghcr.io/kube-vip/kube-vip:v0.4.4"
-      ssh "${USER}@${IP}" "alias kube-vip="ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip""
+      ssh "${USER}@${IP}" 'alias kube-vip="ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip"'
       
       # manifest
-      ssh "${USER}@${IP}" "alias kube-vip="kube-vip manifest daemonset--interface eth0 --address ${IP} --inCluster --taint --controlplane --arp --leaderElection | tee /var/lib/rancher/k3s/server/manifests/kube-vip.yaml""
+      ssh "${USER}@${IP}" 'alias kube-vip="kube-vip manifest daemonset--interface eth0 --address ${IP} --inCluster --taint --controlplane --arp --leaderElection | tee /var/lib/rancher/k3s/server/manifests/kube-vip.yaml"'
       
       # Set any future nodes to join this node
       JOIN_NODE=1
