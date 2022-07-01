@@ -80,13 +80,12 @@ function install() {
       # Apply RBAC
       kubectl apply -f https://kube-vip.io/manifests/rbac.yaml
       
-      # Image && alias
+      # Image
       ssh "${USER}@${IP}" "sudo ctr image pull ghcr.io/kube-vip/kube-vip:v0.4.4"
-      ssh "${USER}@${IP}" 'alias kube-vip="sudo ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip"'
       
       # manifest
-      ssh "${USER}@${IP}" 'kube-vip manifest daemonset--interface eth0 --address ${IP} --inCluster --taint --controlplane --arp --leaderElection | sudo tee /var/lib/rancher/k3s/server/manifests/kube-vip.yaml'
-      ssh "${USER}@${IP}" 'wget -O /var/lib/rancher/k3s/server/manifests/calico-vxlan.yaml /https://raw.githubusercontent.com/asapcatftw/gitpod-k3s-guide/main/assets/calico-vxlan.yaml'
+      ssh "${USER}@${IP}" 'alias kube-vip="sudo ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip && kube-vip manifest daemonset --interface eth0 --address ${IP} --inCluster --taint --controlplane --arp --leaderElection | sudo tee /var/lib/rancher/k3s/server/manifests/kube-vip.yaml'
+      ssh "${USER}@${IP}" 'sudo wget -O /var/lib/rancher/k3s/server/manifests/calico-vxlan.yaml /https://raw.githubusercontent.com/asapcatftw/gitpod-k3s-guide/main/assets/calico-vxlan.yaml'
       # Set any future nodes to join this node
       JOIN_NODE=1
     else
