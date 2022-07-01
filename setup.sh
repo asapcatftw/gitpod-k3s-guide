@@ -90,6 +90,7 @@ function install() {
       JOIN_NODE=1
     else
       echo "Joining node ${IP} to ${SERVER_IP}"
+      sleep 30
 
       k3sup join \
         --ip "${IP}" \
