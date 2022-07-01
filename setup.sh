@@ -85,7 +85,7 @@ function install() {
       
       # manifest
       ssh "${USER}@${IP}" 'sudo ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip manifest daemonset --interface enp1s0 --address 172.16.19.45 --inCluster --taint --controlplane --arp --leaderElection | sudo tee /var/lib/rancher/k3s/server/manifests/kube-vip.yaml'
-      ssh "${USER}@${IP}" 'sudo wget -O /var/lib/rancher/k3s/server/manifests/calico-vxlan.yaml https://raw.githubusercontent.com/asapcatftw/gitpod-k3s-guide/main/assets/calico-vxlan.yaml'
+      #ssh "${USER}@${IP}" 'sudo wget -O /var/lib/rancher/k3s/server/manifests/calico-vxlan.yaml https://raw.githubusercontent.com/asapcatftw/gitpod-k3s-guide/main/assets/calico-vxlan.yaml'
       # Set any future nodes to join this node
       JOIN_NODE=1
     else
