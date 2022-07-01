@@ -68,7 +68,7 @@ function install() {
         --ip "${IP}" \
         --tls-san "${SERVER_IP}" \
         --local-path "${HOME}/.kube/config" \
-        --k3s-extra-args="--disable traefik --disable servicelb --flannel-backend=none --disable-network-policy --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true --cluster-cidr=172.18.0.0/16" \
+        --k3s-extra-args="--disable traefik --disable servicelb --flannel-backend=none --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true" \
         --user "${USER}"
       
       # Setup kube-vip
@@ -84,7 +84,7 @@ function install() {
       ssh "${USER}@${IP}" "sudo ctr image pull ghcr.io/kube-vip/kube-vip:v0.4.4"
       
       # manifest
-      ssh "${USER}@${IP}" 'sudo ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip manifest daemonset --interface enp1s0 --address 172.16.19.45 --inCluster --taint --controlplane --arp --leaderElection | sudo tee /var/lib/rancher/k3s/server/manifests/kube-vip.yaml'
+      ssh "${USER}@${IP}" 'sudo ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip manifest daemonset --interface enp1s0 --address ${SERVER_IP} --inCluster --taint --controlplane --arp --leaderElection | sudo tee /var/lib/rancher/k3s/server/manifests/kube-vip.yaml'
       #ssh "${USER}@${IP}" 'sudo wget -O /var/lib/rancher/k3s/server/manifests/calico-vxlan.yaml https://raw.githubusercontent.com/asapcatftw/gitpod-k3s-guide/main/assets/calico-vxlan.yaml'
       # Set any future nodes to join this node
       JOIN_NODE=1
