@@ -95,7 +95,7 @@ function install() {
       k3sup join \
         --ip "${IP}" \
         --server-ip "${SERVER_IP}" \
-        --k3s-extra-args="--node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true" \
+        --k3s-extra-args="--disable traefik --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true" \
         --server \
         --user "${USER}"
     fi
