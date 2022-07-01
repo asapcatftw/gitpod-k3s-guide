@@ -68,7 +68,7 @@ function install() {
         --ip "${IP}" \
         --tls-san "${SERVER_IP}" \
         --local-path "${HOME}/.kube/config" \
-        --k3s-extra-args="--disable traefik --disable servicelb --flannel-backend=none --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true" \
+        --k3s-extra-args="--disable traefik --disable servicelb --flannel-backend=none --disable-network-policy --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true" \
         --user "${USER}"
       
       # Setup kube-vip
