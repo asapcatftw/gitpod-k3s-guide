@@ -68,7 +68,7 @@ function install() {
         --ip "${IP}" \
         --tls-san "${SERVER_IP}" \
         --local-path "${HOME}/.kube/config" \
-        --k3s-extra-args="--disable traefik --disable servicelb --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true" \
+        --k3s-extra-args="--disable traefik --disable servicelb --flannel-backend=none --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true" \
         --user "${USER}"
       
       # Setup kube-vip
@@ -82,11 +82,11 @@ function install() {
       
       # Image && alias
       ssh "${USER}@${IP}" "sudo ctr image pull ghcr.io/kube-vip/kube-vip:v0.4.4"
-      ssh "${USER}@${IP}" 'alias kube-vip="ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip"'
+      ssh "${USER}@${IP}" 'alias kube-vip="sudo ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip"'
       
       # manifest
-      ssh "${USER}@${IP}" 'kube-vip manifest daemonset--interface eth0 --address ${IP} --inCluster --taint --controlplane --arp --leaderElection | tee /var/lib/rancher/k3s/server/manifests/kube-vip.yaml'
-      
+      ssh "${USER}@${IP}" 'kube-vip manifest daemonset--interface eth0 --address ${IP} --inCluster --taint --controlplane --arp --leaderElection | sudo tee /var/lib/rancher/k3s/server/manifests/kube-vip.yaml'
+      ssh "${USER}@${IP}" 'wget -O /var/lib/rancher/k3s/server/manifests/calico-vxlan.yaml /https://raw.githubusercontent.com/asapcatftw/gitpod-k3s-guide/main/assets/calico-vxlan.yaml'
       # Set any future nodes to join this node
       JOIN_NODE=1
     else
@@ -95,7 +95,7 @@ function install() {
       k3sup join \
         --ip "${IP}" \
         --server-ip "${SERVER_IP}" \
-        --k3s-extra-args="--disable traefik --disable servicelb --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true" \
+        --k3s-extra-args="--node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true" \
         --server \
         --user "${USER}"
     fi
